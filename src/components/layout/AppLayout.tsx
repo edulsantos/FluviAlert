@@ -1,10 +1,18 @@
-import React, { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
 
 const AppLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const userId = localStorage.getItem('user_id')
+    if (!userId) {
+      navigate('/login')
+    }
+  }, [navigate])
 
   return (
     <div className="min-h-screen bg-brand-bg text-brand-text">

@@ -1,45 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Search, Bell, Menu, User, Settings, LogOut, AlertTriangle, Info, CheckCircle2 } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { Search, Bell, Menu, User, LogOut, AlertTriangle, LogIn } from 'lucide-react'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
+import Button from '../ui/Button'
+
+import { getFloodRanking } from '../../services/api'
 
 interface HeaderProps {
   onMenuClick: () => void
 }
-
-const notifications = [
-  {
-    id: 1,
-    type: 'critical',
-    title: 'Nível Crítico — Petrópolis',
-    desc: 'Rio Quitandinha atingiu cota de emergência (4.2m)',
-    time: '5 min atrás',
-    icon: <AlertTriangle size={14} />,
-  },
-  {
-    id: 2,
-    type: 'warning',
-    title: 'Atenção — Blumenau',
-    desc: 'Precipitação acumulada acima de 200mm em 24h',
-    time: '32 min atrás',
-    icon: <AlertTriangle size={14} />,
-  },
-  {
-    id: 3,
-    type: 'info',
-    title: 'Atualização do Sistema',
-    desc: 'Modelos meteorológicos atualizados com dados INMET',
-    time: '2h atrás',
-    icon: <Info size={14} />,
-  },
-  {
-    id: 4,
-    type: 'safe',
-    title: 'Situação Normalizada — Manaus',
-    desc: 'Nível do rio recuou para zona de atenção',
-    time: '3h atrás',
-    icon: <CheckCircle2 size={14} />,
-  },
-]
 
 const typeStyles: Record<string, string> = {
   critical: 'text-brand-critical bg-brand-critical/10',
@@ -50,22 +18,58 @@ const typeStyles: Record<string, string> = {
 
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const location = useLocation()
+  const navigate = useNavigate()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotifOpen, setIsNotifOpen] = useState(false)
+  const [userName, setUserName] = useState<string | null>(null)
+  const [notifications, setNotifications] = useState<any[]>([])
 
   const profileRef = useRef<HTMLDivElement>(null)
   const notifRef   = useRef<HTMLDivElement>(null)
 
-  const hideSearch = location.pathname === '/alerts' || location.pathname === '/about'
+  const hideSearch = location.pathname === '/alerts' || location.pathname === '/about' || location.pathname === '/login' || location.pathname === '/register'
 
   useEffect(() => {
+    setUserName(localStorage.getItem('user_name'))
+    
+    // Gerar notificações reais baseadas no ranking
+    const loadNotifications = async () => {
+      try {
+        const ranking = await getFloodRanking()
+        const criticalCities = ranking.filter(c => c.risk_level === 'alto' || c.risk_level === 'moderado')
+        
+        const newNotifs = criticalCities.slice(0, 5).map(c => ({
+          id: c.city_name,
+          type: c.risk_level === 'alto' ? 'critical' : 'warning',
+          title: `${c.risk_level === 'alto' ? 'Nível Crítico' : 'Atenção'} — ${c.city_name}`,
+          desc: `Risco de inundação detectado. Vazão projetada: ${c.max_discharge.toFixed(0)}m³/s`,
+          time: 'Atualizado agora',
+          icon: <AlertTriangle size={14} />,
+        }))
+        setNotifications(newNotifs)
+      } catch (err) {
+        console.error('Erro ao carregar notificações:', err)
+      }
+    }
+
+    loadNotifications()
+
     const handleClickOutside = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) setIsProfileOpen(false)
       if (notifRef.current  && !notifRef.current.contains(e.target  as Node)) setIsNotifOpen(false)
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  }, [location])
+
+  const handleLogout = () => {
+    localStorage.removeItem('user_id')
+    localStorage.removeItem('user_name')
+    localStorage.removeItem('token')
+    setUserName(null)
+    setIsProfileOpen(false)
+    navigate('/login')
+  }
 
   return (
     <header className="h-16 border-b border-brand-border bg-brand-bg/90 backdrop-blur-md sticky top-0 z-10 px-6 flex items-center justify-between gap-4">
@@ -105,21 +109,15 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
           {isNotifOpen && (
             <div className="absolute right-0 mt-2 w-80 bg-brand-card border border-brand-border rounded-xl shadow-2xl z-50 overflow-hidden">
-              {/* Header do painel */}
               <div className="px-4 py-3 border-b border-brand-border flex items-center justify-between">
                 <p className="text-sm font-bold text-white">Notificações</p>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-brand-primary bg-brand-primary/10 px-2 py-0.5 rounded-full">
                   {notifications.length} novas
                 </span>
               </div>
-
-              {/* Lista */}
               <div className="divide-y divide-brand-border/50 max-h-80 overflow-y-auto">
                 {notifications.map((n) => (
-                  <div
-                    key={n.id}
-                    className="px-4 py-3 hover:bg-brand-bg/50 transition-colors cursor-pointer"
-                  >
+                  <div key={n.id} className="px-4 py-3 hover:bg-brand-bg/50 transition-colors cursor-pointer">
                     <div className="flex items-start gap-3">
                       <div className={`mt-0.5 p-1.5 rounded-lg flex-shrink-0 ${typeStyles[n.type]}`}>
                         {n.icon}
@@ -133,57 +131,46 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                   </div>
                 ))}
               </div>
-
-              {/* Footer */}
-              <div className="px-4 py-3 border-t border-brand-border bg-brand-bg/30">
-                <button className="text-xs font-semibold text-brand-primary hover:text-blue-400 transition-colors w-full text-center">
-                  Ver todas as notificações
-                </button>
-              </div>
             </div>
           )}
         </div>
 
-        {/* Separador */}
         <div className="w-px h-6 bg-brand-border" />
 
-        {/* Perfil */}
+        {/* Perfil / Login */}
         <div className="relative" ref={profileRef}>
-          <button
-            onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false) }}
-            className="flex items-center gap-3 cursor-pointer group"
-          >
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-semibold text-brand-text group-hover:text-brand-primary transition-colors leading-tight">
-                Gabriel Silva
-              </p>
-              <p className="text-[10px] text-brand-muted uppercase tracking-wider font-bold">
-                Monitor de Nível
-              </p>
-            </div>
-            <div className="w-9 h-9 rounded-lg overflow-hidden border border-brand-border group-hover:border-brand-primary transition-colors">
-              <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Gabriel"
-                alt="Avatar"
-                className="w-full h-full object-cover bg-brand-card"
-              />
-            </div>
-          </button>
-
-          {isProfileOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-brand-card border border-brand-border rounded-xl shadow-2xl py-2 z-50">
-              <div className="px-4 py-2 border-b border-brand-border/50 mb-1 sm:hidden">
-                <p className="text-sm font-semibold text-brand-text">Gabriel Silva</p>
-                <p className="text-[10px] text-brand-muted uppercase tracking-wider">Monitor de Nível</p>
+          {userName ? (
+            <button
+              onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false) }}
+              className="flex items-center gap-3 cursor-pointer group"
+            >
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-semibold text-brand-text group-hover:text-brand-primary transition-colors leading-tight">
+                  {userName}
+                </p>
+                <p className="text-[10px] text-brand-muted uppercase tracking-wider font-bold">
+                  Usuário Ativo
+                </p>
               </div>
-              <button onClick={() => setIsProfileOpen(false)} className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-primary/10 hover:text-brand-primary transition-colors flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg overflow-hidden border border-brand-border group-hover:border-brand-primary transition-colors flex items-center justify-center bg-brand-primary/10 text-brand-primary">
+                <User size={20} />
+              </div>
+            </button>
+          ) : (
+            <Link to="/login">
+              <Button size="sm" variant="primary" icon={<LogIn size={16} />} className="font-bold">
+                Entrar
+              </Button>
+            </Link>
+          )}
+
+          {isProfileOpen && userName && (
+            <div className="absolute right-0 mt-2 w-48 bg-brand-card border border-brand-border rounded-xl shadow-2xl py-2 z-50">
+              <button className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-primary/10 hover:text-brand-primary transition-colors flex items-center gap-2">
                 <User size={15} /> Editar Perfil
               </button>
-              <button onClick={() => setIsProfileOpen(false)} className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-primary/10 hover:text-brand-primary transition-colors flex items-center gap-2">
-                <Settings size={15} /> Configurações
-              </button>
               <div className="h-px bg-brand-border/50 my-1" />
-              <button onClick={() => setIsProfileOpen(false)} className="w-full text-left px-4 py-2 text-sm text-brand-critical hover:bg-brand-critical/10 transition-colors flex items-center gap-2">
+              <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-brand-critical hover:bg-brand-critical/10 transition-colors flex items-center gap-2">
                 <LogOut size={15} /> Sair
               </button>
             </div>

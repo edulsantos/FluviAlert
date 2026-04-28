@@ -1,77 +1,123 @@
-import { mockCities } from '../mocks/cities'
+import React, { useEffect, useState } from 'react'
+import { getFloodRanking, getFloodStats } from '../services/api'
+import type { RankingCity } from '../services/api'
 import SafetyGauge from '../components/dashboard/SafetyGauge'
 import RiskTable from '../components/dashboard/RiskTable'
 import MetricCard from '../components/dashboard/MetricCard'
 import Button from '../components/ui/Button'
-import { Waves, Zap, BarChart3, Download, ExternalLink } from 'lucide-react'
+import { Waves, Zap, BarChart3, Download, ExternalLink, Loader2 } from 'lucide-react'
 
 const Dashboard: React.FC = () => {
-  const tableCities = mockCities.slice(0, 5)
+  const [ranking, setRanking] = useState<RankingCity[]>([])
+  const [stats, setStats] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [rankingData, statsData] = await Promise.all([
+          getFloodRanking(),
+          getFloodStats()
+        ])
+        setRanking(rankingData.slice(0, 20))
+        setStats(statsData)
+      } catch (err) {
+        console.error(err)
+        setError('Falha ao carregar os dados de monitoramento.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="grid grid-cols-12 gap-8 h-80">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:h-80">
         {/* Hero Card */}
-        <div className="col-span-8 relative rounded-2xl overflow-hidden group">
+        <div className="lg:col-span-8 relative rounded-2xl overflow-hidden group min-h-[300px]">
           <img 
             src="/hero.png" 
             alt="Flood monitoring" 
             className="absolute inset-0 w-full h-full object-cover brightness-50 group-hover:scale-105 transition-transform duration-1000"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-bg via-brand-bg/40 to-transparent p-10 flex flex-col justify-end">
-            <span className="bg-brand-safe/20 text-brand-safe border border-brand-safe px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit mb-4">
-              Safe Horizon
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-bg via-brand-bg/40 to-transparent p-6 lg:p-10 flex flex-col justify-end">
+            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit mb-4 border ${
+              stats?.critical_alerts_count > 0 
+                ? 'bg-brand-critical/20 text-brand-critical border-brand-critical' 
+                : 'bg-brand-safe/20 text-brand-safe border-brand-safe'
+            }`}>
+              {stats?.critical_alerts_count > 0 ? 'Alerta Crítico Ativo' : 'Monitoramento Estável'}
             </span>
-            <h2 className="text-5xl font-black text-white tracking-tighter mb-4 max-w-md">
-              Monitoramento Estável
+            <h2 className="text-3xl lg:text-5xl font-black text-white tracking-tighter mb-4 max-w-md">
+              {stats?.critical_alerts_count > 0 ? 'Risco Identificado' : 'Sistema Operacional'}
             </h2>
-            <p className="text-brand-muted text-lg max-w-xl">
-              As condições hidrológicas atuais permanecem dentro dos parâmetros de segurança em 95% das zonas monitoradas.
+            <p className="text-brand-muted text-sm lg:text-lg max-w-xl font-medium">
+              {stats?.critical_alerts_count > 0 
+                ? `Atenção: ${stats.critical_alerts_count} zonas monitoradas apresentam níveis de vazão acima da média de segurança.`
+                : `As condições hidrológicas atuais permanecem dentro dos parâmetros de segurança em ${stats?.safety_percentage || 100}% das zonas.`
+              }
             </p>
           </div>
         </div>
 
         {/* Safety Gauge */}
-        <div className="col-span-4">
-          <SafetyGauge percentage={92} trend="+1.2% desde ontem" />
+        <div className="lg:col-span-4 h-full">
+          <SafetyGauge 
+            percentage={stats?.safety_percentage || 100} 
+            trend={stats?.safety_percentage > 90 ? "+1.2% estabilidade" : "Risco em análise"} 
+          />
         </div>
       </div>
 
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h3 className="text-2xl font-black tracking-tight text-white">Projeção de Risco (15 Dias)</h3>
-          <p className="text-sm text-brand-muted font-medium mt-1">Análise preditiva baseada em modelos meteorológicos e satélite.</p>
+          <h3 className="text-xl lg:text-2xl font-black tracking-tight text-white">Ranking de Risco (Top 20 Cidades)</h3>
+          <p className="text-xs lg:text-sm text-brand-muted font-medium mt-1">Análise baseada na vazão máxima projetada para o período.</p>
         </div>
-        <div className="flex gap-4">
-          <Button variant="outline" size="sm" icon={<Download size={16} />}>Exportar PDF</Button>
-          <Button variant="primary" size="sm" icon={<ExternalLink size={16} />}>Ver Detalhes</Button>
+        <div className="flex gap-2 lg:gap-4">
+          <Button variant="outline" size="sm" icon={<Download size={16} />}>Exportar</Button>
+          <Button variant="primary" size="sm" icon={<ExternalLink size={16} />}>Detalhes</Button>
         </div>
       </div>
 
-      <div className="brand-card p-2">
-        <RiskTable cities={tableCities} />
+      <div className="brand-card p-2 min-h-[400px] flex flex-col overflow-hidden">
+        {loading ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-brand-muted gap-4 py-20">
+            <Loader2 size={48} className="animate-spin text-brand-primary" />
+            <p className="font-bold uppercase tracking-widest text-[10px]">Sincronizando com satélites...</p>
+          </div>
+        ) : error ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-brand-critical gap-2 p-8 text-center">
+            <p className="font-bold">{error}</p>
+            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Tentar Novamente</Button>
+          </div>
+        ) : (
+          <RiskTable cities={ranking} />
+        )}
       </div>
 
-      <div className="grid grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
         <MetricCard 
           label="Estações Ativas" 
-          value="1.248" 
+          value={stats?.active_stations?.toLocaleString('pt-BR') || '---'} 
           icon={<Waves size={24} />} 
         />
         <MetricCard 
           label="Latência de Dados" 
-          value="0.4s" 
+          value={stats?.data_latency || '---'} 
           icon={<Zap size={24} />} 
         />
         <MetricCard 
-          label="Previsões Processadas" 
-          value="24.5k" 
-          unit="/dia"
+          label="Previsões / Dia" 
+          value={stats?.processed_forecasts || '---'} 
           icon={<BarChart3 size={24} />} 
         />
       </div>
 
-      <footer className="pt-8 border-t border-brand-border flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-brand-muted">
+      <footer className="pt-8 border-t border-brand-border flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-muted">
         <div>© 2026 FluviAlert Intelligence Systems</div>
         <div className="flex gap-8">
           <a href="#" className="hover:text-brand-text transition-colors">Privacidade</a>

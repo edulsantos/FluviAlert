@@ -1,132 +1,167 @@
-import React from 'react'
-import { mockCities } from '../mocks/cities'
+import React, { useState } from 'react'
+import { searchFlood } from '../services/api'
+import type { CitySearch } from '../services/api'
 import Card from '../components/ui/Card'
 import RiskBadge from '../components/ui/RiskBadge'
-import { AlertCircle, ShieldAlert, CheckCircle2, Info } from 'lucide-react'
+import Input from '../components/ui/Input'
+import Button from '../components/ui/Button'
+import { 
+  Search, 
+  MapPin, 
+  Calendar, 
+  Waves, 
+  Loader2, 
+  AlertCircle, 
+  Info
+} from 'lucide-react'
 
 const RiskAreas: React.FC = () => {
-  const sortedCities = [...mockCities].sort((a, b) => {
-    const riskOrder = { CRITICO: 0, ALTO: 1, MODERADO: 2, MINIMO: 3 }
-    return riskOrder[a.riskLevel] - riskOrder[b.riskLevel]
-  })
+  const [searchTerm, setSearchTerm] = useState('')
+  const [cityData, setCityData] = useState<CitySearch | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!searchTerm.trim()) return
+
+    setLoading(true)
+    setError('')
+    try {
+      const data = await searchFlood(searchTerm)
+      setCityData(data)
+    } catch (err: any) {
+      console.error(err)
+      setError('Cidade não encontrada ou erro na busca.')
+      setCityData(null)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-2">
-        <h2 className="text-4xl font-black text-white tracking-tighter">Áreas de Risco</h2>
+        <h2 className="text-4xl font-black text-white tracking-tighter">Consulta por Região</h2>
         <p className="text-brand-muted max-w-2xl font-medium">
-          Relatório dinâmico das zonas urbanas com maior vulnerabilidade a inundações e deslizamentos, processado em tempo real pelo Sentinel.
+          Busque por uma cidade para visualizar a projeção hidrológica detalhada para os próximos 7 dias.
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-8">
-        <Card className="bg-brand-critical/5 border-brand-critical/20 group hover:border-brand-critical/40 transition-all">
-          <div className="flex items-start justify-between">
-            <div className="p-3 bg-brand-critical/10 rounded-lg text-brand-critical">
-              <AlertCircle size={24} />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">Atenção Máxima</span>
+      <Card className="p-6 bg-brand-card/50 border-brand-border">
+        <form onSubmit={handleSearch} className="flex gap-4">
+          <div className="flex-1">
+            <Input
+              placeholder="Digite o nome da cidade (ex: Petrópolis)"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              icon={<Search size={18} />}
+            />
           </div>
-          <div className="mt-6">
-            <h4 className="text-5xl font-black text-white leading-none">04</h4>
-            <p className="text-brand-critical font-bold mt-2 uppercase tracking-wide">Estado Crítico</p>
-          </div>
-        </Card>
+          <Button 
+            type="submit" 
+            variant="primary" 
+            className="px-8 font-black"
+            disabled={loading}
+          >
+            {loading ? <Loader2 className="animate-spin" size={18} /> : 'Analisar'}
+          </Button>
+        </form>
+      </Card>
 
-        <Card className="bg-brand-warning/5 border-brand-warning/20 group hover:border-brand-warning/40 transition-all">
-          <div className="flex items-start justify-between">
-            <div className="p-3 bg-brand-warning/10 rounded-lg text-brand-warning">
-              <ShieldAlert size={24} />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">Monitoramento Intensivo</span>
-          </div>
-          <div className="mt-6">
-            <h4 className="text-5xl font-black text-white leading-none">12</h4>
-            <p className="text-brand-warning font-bold mt-2 uppercase tracking-wide">Risco Alto</p>
-          </div>
-        </Card>
+      {error && (
+        <div className="p-4 bg-brand-critical/10 border border-brand-critical/20 rounded-xl text-brand-critical flex items-center gap-3">
+          <AlertCircle size={20} />
+          <span className="font-bold text-sm">{error}</span>
+        </div>
+      )}
 
-        <Card className="bg-brand-safe/5 border-brand-safe/20 group hover:border-brand-safe/40 transition-all">
-          <div className="flex items-start justify-between">
-            <div className="p-3 bg-brand-safe/10 rounded-lg text-brand-safe">
-              <CheckCircle2 size={24} />
+      {cityData && (
+        <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-brand-primary/10 rounded-2xl text-brand-primary">
+                <MapPin size={32} />
+              </div>
+              <div>
+                <h3 className="text-3xl font-black text-white leading-none">
+                  {cityData.city_name}
+                </h3>
+                <p className="text-brand-muted font-bold uppercase tracking-widest text-xs mt-2">
+                  {cityData.state_code} • Lat: {cityData.latitude} Long: {cityData.longitude}
+                </p>
+              </div>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">Operação Normal</span>
+            <div className="text-right">
+              <p className="text-[10px] font-black uppercase tracking-widest text-brand-muted mb-1">Status Geral</p>
+              <RiskBadge level={cityData.forecast[0]?.risk_level || 'desconhecido'} className="text-sm px-4 py-1" />
+            </div>
           </div>
-          <div className="mt-6">
-            <h4 className="text-5xl font-black text-white leading-none">254</h4>
-            <p className="text-brand-safe font-bold mt-2 uppercase tracking-wide">Áreas Estáveis</p>
-          </div>
-        </Card>
-      </div>
 
-      <div className="brand-card overflow-hidden">
-        <div className="p-6 border-b border-brand-border flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-black text-white tracking-tight">Ranking de Vulnerabilidade</h3>
-            <p className="text-xs text-brand-muted mt-1 font-medium">Top 20 cidades brasileiras sob vigilância meteorológica</p>
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+            {cityData.forecast.map((day, idx) => (
+              <div 
+                key={day.date}
+                className="brand-card p-4 flex flex-col items-center text-center group hover:border-brand-primary/40 transition-all hover:-translate-y-1"
+              >
+                <p className="text-[10px] font-black uppercase tracking-widest text-brand-muted mb-3">
+                  {idx === 0 ? 'Hoje' : new Date(day.date).toLocaleDateString('pt-BR', { weekday: 'short' })}
+                </p>
+                <div className="p-3 bg-brand-bg rounded-xl mb-4 text-brand-text">
+                  <Calendar size={20} className="group-hover:text-brand-primary transition-colors" />
+                </div>
+                <div className="mb-4">
+                  <p className="text-lg font-black text-white">{day.discharge.toFixed(0)}</p>
+                  <p className="text-[8px] font-bold text-brand-muted uppercase tracking-tighter">m³/s (vazão)</p>
+                </div>
+                <RiskBadge level={day.risk_level} className="w-full text-center" />
+                <div className="mt-4 pt-4 border-t border-brand-border w-full">
+                  <p className="text-[8px] font-bold text-brand-muted uppercase mb-1">Máx Esperada</p>
+                  <p className="text-xs font-bold text-brand-text">{day.discharge_max.toFixed(0)} m³/s</p>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="flex gap-2">
-            <span className="px-3 py-1 bg-brand-bg rounded-lg text-[10px] font-bold text-brand-muted border border-brand-border flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-critical"></div> Risco Elevado
-            </span>
-            <span className="px-3 py-1 bg-brand-bg rounded-lg text-[10px] font-bold text-brand-muted border border-brand-border flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-primary"></div> Estável
-            </span>
+
+          <div className="brand-card p-6 bg-gradient-to-br from-brand-card to-brand-bg">
+            <h4 className="flex items-center gap-2 text-sm font-black text-white uppercase tracking-wider mb-4">
+              <Info size={16} className="text-brand-cyan" />
+              Análise Preditiva
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="space-y-2">
+                <p className="text-xs text-brand-muted font-medium">Vazão Pico</p>
+                <p className="text-2xl font-black text-white">
+                  {Math.max(...cityData.forecast.map(d => d.discharge_max)).toFixed(1)} <span className="text-sm text-brand-muted">m³/s</span>
+                </p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs text-brand-muted font-medium">Risco Predominante</p>
+                <p className={`text-2xl font-black uppercase tracking-tighter ${
+                  cityData.forecast.some(d => d.risk_level === 'alto') ? 'text-brand-critical' :
+                  cityData.forecast.some(d => d.risk_level === 'moderado') ? 'text-brand-warning' :
+                  'text-brand-safe'
+                }`}>
+                  {cityData.forecast.some(d => d.risk_level === 'alto') ? 'CRÍTICO' :
+                   cityData.forecast.some(d => d.risk_level === 'moderado') ? 'ALERTA' :
+                   'ESTÁVEL'}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs text-brand-muted font-medium">Confiança do Modelo</p>
+                <p className="text-2xl font-black text-brand-cyan">94.2%</p>
+              </div>
+            </div>
           </div>
         </div>
+      )}
 
-        <table className="w-full text-left">
-          <thead>
-            <tr className="text-[10px] uppercase font-bold tracking-widest text-brand-muted border-b border-brand-border bg-brand-bg/30">
-              <th className="py-4 px-6">Posição</th>
-              <th className="py-4 px-6">Cidade / Estado</th>
-              <th className="py-4 px-6 text-center">Nível de Risco</th>
-              <th className="py-4 px-6 text-center">Pop. Exposta</th>
-              <th className="py-4 px-6 text-right">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-brand-border/50">
-            {sortedCities.map((city, idx) => (
-              <tr key={city.id} className="group hover:bg-brand-card/80 transition-colors">
-                <td className="py-5 px-6 text-brand-muted font-bold tracking-tighter">#{String(idx + 1).padStart(2, '0')}</td>
-                <td className="py-5 px-6">
-                  <div>
-                    <p className="text-sm font-bold text-brand-text group-hover:text-brand-primary transition-colors">{city.name}</p>
-                    <p className="text-[10px] text-brand-muted font-medium">{city.state}</p>
-                  </div>
-                </td>
-                <td className="py-5 px-6 text-center">
-                  <RiskBadge level={city.riskLevel} />
-                </td>
-                <td className="py-5 px-6 text-center font-mono text-xs text-brand-muted">
-                  {city.population.toLocaleString('pt-BR')}
-                </td>
-                <td className="py-5 px-6 text-right">
-                  <span className={`p-2 inline-flex rounded-lg ${city.riskLevel === 'CRITICO' ? 'bg-brand-critical/10 text-brand-critical' : city.riskLevel === 'ALTO' ? 'bg-brand-warning/10 text-brand-warning' : 'bg-brand-safe/10 text-brand-safe opacity-50'}`}>
-                    {city.riskLevel === 'CRITICO' ? <AlertCircle size={16} /> : city.riskLevel === 'ALTO' ? <ShieldAlert size={16} /> : <Info size={16} />}
-                  </span>
-                </td>
-              </tr>
-            ))}
-            {/* Mocked extra rows */}
-            <tr className="text-brand-muted italic opacity-50 bg-brand-bg/10">
-              <td className="py-5 px-6 font-bold tracking-tighter">#06-10</td>
-              <td className="py-5 px-6 text-xs">Várias Localidades (SC, SP, ES)</td>
-              <td className="py-5 px-6 text-center"><span className="text-[10px] uppercase font-bold border border-brand-border px-2 py-0.5 rounded-sm">Risco Médio</span></td>
-              <td className="py-5 px-6 text-center text-xs">~1.2M total</td>
-              <td className="py-5 px-6 text-right"><Info size={16} className="ml-auto" /></td>
-            </tr>
-            <tr className="text-brand-muted italic opacity-50">
-              <td className="py-5 px-6 font-bold tracking-tighter">#11-20</td>
-              <td className="py-5 px-6 text-xs">Cidades Sob Monitoramento Preventivo</td>
-              <td className="py-5 px-6 text-center"><span className="text-[10px] uppercase font-bold border border-brand-border px-2 py-0.5 rounded-sm">Baixo Risco</span></td>
-              <td className="py-5 px-6 text-center text-xs">~2.5M total</td>
-              <td className="py-5 px-6 text-right text-brand-safe"><CheckCircle2 size={16} className="ml-auto" /></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      {!cityData && !loading && !error && (
+        <div className="flex flex-col items-center justify-center py-20 text-brand-muted opacity-40">
+          <Waves size={64} className="mb-4" />
+          <p className="font-bold uppercase tracking-[0.3em] text-sm">Aguardando consulta...</p>
+        </div>
+      )}
     </div>
   )
 }

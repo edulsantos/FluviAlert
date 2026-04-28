@@ -1,4 +1,4 @@
-export type RiskLevel = 'MINIMO' | 'MODERADO' | 'ALTO' | 'CRITICO'
+export type RiskLevel = 'baixo' | 'moderado' | 'alto' | 'desconhecido'
 
 export interface City {
   id: string

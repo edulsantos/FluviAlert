@@ -38,14 +38,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         `}
       >
         {/* Logo */}
-        <div className="flex-shrink-0 px-6 py-8 flex items-start justify-between">
-          <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-white to-brand-muted bg-clip-text text-transparent">
-              FluviAlert
-            </h1>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-brand-muted font-bold mt-0.5">
-              Monitoramento de Enchentes
-            </p>
+        <div className="flex-shrink-0 px-6 py-8 flex items-center gap-4 justify-between border-b border-brand-border/30 mb-2">
+          <div className="flex items-center gap-3">
+            <img src="/favicon.png" alt="FA Logo" className="w-10 h-10 rounded-xl shadow-md" />
+            <div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-white to-brand-muted bg-clip-text text-transparent leading-none">
+                FluviAlert
+              </h1>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-brand-muted font-bold mt-1">
+                Intelligence
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}

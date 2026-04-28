@@ -1,0 +1,107 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { loginUser } from '../services/api';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import Card from '../components/ui/Card';
+import { Mail, Lock, LogIn } from 'lucide-react';
+
+const LoginPage: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      await loginUser({ email, password });
+      navigate('/');
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Erro ao fazer login. Verifique suas credenciais.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-brand-bg flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background elements for premium look */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-primary/5 rounded-full blur-[120px]"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-cyan/5 rounded-full blur-[120px]"></div>
+      
+      <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-700 relative z-10">
+        <div className="flex flex-col items-center mb-8">
+          <div className="mb-4">
+            <img src="/favicon.png" alt="FluviAlert Logo" className="w-20 h-20 rounded-2xl shadow-lg border border-brand-primary/20" />
+          </div>
+          <h1 className="text-4xl font-black text-white tracking-tighter mb-1">FluviAlert</h1>
+          <p className="text-brand-muted font-bold uppercase tracking-widest text-[10px]">Intelligence System</p>
+        </div>
+
+        <Card className="p-8 bg-brand-card/50 border-brand-border backdrop-blur-xl shadow-2xl">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-white tracking-tight">Bem-vindo de volta</h2>
+            <p className="text-brand-muted text-sm mt-1 font-medium">Acesse sua conta para monitorar riscos</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            <Input
+              label="E-mail"
+              type="email"
+              placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              icon={<Mail size={18} />}
+              required
+            />
+            <Input
+              label="Senha"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              icon={<Lock size={18} />}
+              required
+            />
+
+            {error && (
+              <div className="p-3 bg-brand-critical/10 border border-brand-critical/20 rounded-lg text-brand-critical text-xs font-bold flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-brand-critical animate-pulse" />
+                {error}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full py-4 text-base font-black shadow-xl shadow-brand-primary/20 hover:scale-[1.02] transition-transform"
+              disabled={loading}
+              icon={loading ? null : <LogIn size={18} />}
+            >
+              {loading ? 'Processando Autenticação...' : 'Entrar no Sistema'}
+            </Button>
+          </form>
+
+          <div className="mt-8 pt-6 border-t border-brand-border text-center">
+            <p className="text-xs text-brand-muted font-medium">
+              Não tem acesso? <Link 
+                to="/register"
+                className="text-brand-primary hover:underline font-bold"
+              >Solicitar Credenciais</Link>
+            </p>
+          </div>
+        </Card>
+        
+        <p className="mt-8 text-center text-[10px] text-brand-muted font-bold uppercase tracking-[0.2em]">
+          © 2026 FluviAlert Intelligence • UFSM
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default LoginPage;

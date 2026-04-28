@@ -1,63 +1,57 @@
-import type { City } from '../../types'
+import type { RankingCity } from '../../services/api'
 import RiskBadge from '../ui/RiskBadge'
-import { TrendingUp, TrendingDown, Minus, CheckCircle, AlertTriangle, Eye } from 'lucide-react'
+import { MapPin, Calendar, Waves } from 'lucide-react'
 
 interface RiskTableProps {
-  cities: City[]
+  cities: RankingCity[]
 }
 
 const RiskTable: React.FC<RiskTableProps> = ({ cities }) => {
-  const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
-    switch (trend) {
-      case 'up': return <TrendingUp size={16} className="text-brand-critical" />
-      case 'down': return <TrendingDown size={16} className="text-brand-safe" />
-      case 'stable': return <Minus size={16} className="text-brand-muted" />
-    }
-  }
-
-  const getStatusIcon = (status: string) => {
-    if (status.includes('Normal') || status.includes('Regular')) return <CheckCircle size={14} className="text-brand-safe" />
-    if (status.includes('Atenção') || status.includes('Intensivo')) return <AlertTriangle size={14} className="text-brand-warning" />
-    if (status.includes('Máximo') || status.includes('Crítico')) return <AlertTriangle size={14} className="text-brand-critical" />
-    return <Eye size={14} className="text-brand-muted" />
-  }
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="text-[10px] uppercase tracking-widest text-brand-muted font-bold border-b border-brand-border">
-            <th className="py-4 px-6">Cidade</th>
+            <th className="py-4 px-6">Posição</th>
+            <th className="py-4 px-6">Cidade / UF</th>
             <th className="py-4 px-6 text-center">Nível de Risco</th>
-            <th className="py-4 px-6">Precipitação Total (15d)</th>
-            <th className="py-4 px-6">Status Alerta</th>
-            <th className="py-4 px-6 text-right">Tendência</th>
+            <th className="py-4 px-6 text-center">Vazão Máx. (m³/s)</th>
+            <th className="py-4 px-6 text-right">Data do Pico</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-brand-border/50">
-          {cities.map((city) => (
-            <tr key={city.id} className="group hover:bg-brand-card/50 transition-colors">
+          {cities.map((city, index) => (
+            <tr key={`${city.city_name}-${city.state_code}`} className="group hover:bg-brand-card/50 transition-colors">
+              <td className="py-4 px-6 text-brand-muted font-mono text-xs">
+                #{String(index + 1).padStart(2, '0')}
+              </td>
               <td className="py-4 px-6">
                 <div className="flex items-center gap-3">
-                  <div className={`w-1.5 h-1.5 rounded-full ${city.riskLevel === 'CRITICO' ? 'bg-brand-critical' : city.riskLevel === 'ALTO' ? 'bg-brand-warning' : city.riskLevel === 'MODERADO' ? 'bg-orange-400' : 'bg-brand-safe'}`}></div>
-                  <span className="text-sm font-semibold">{city.name}</span>
+                  <MapPin size={14} className="text-brand-primary" />
+                  <div>
+                    <span className="text-sm font-semibold text-white block">{city.city_name}</span>
+                    <span className="text-[10px] text-brand-muted uppercase font-bold">{city.state_code}</span>
+                  </div>
                 </div>
               </td>
               <td className="py-4 px-6 text-center">
-                <RiskBadge level={city.riskLevel} />
+                <RiskBadge level={city.risk_level} />
               </td>
-              <td className="py-4 px-6 text-sm font-medium text-brand-muted">
-                {city.precipitation15d}mm
-              </td>
-              <td className="py-4 px-6">
-                <div className="flex items-center gap-2 text-xs font-semibold">
-                  {getStatusIcon(city.alertStatus)}
-                  <span className="text-brand-text/90">{city.alertStatus}</span>
+              <td className="py-4 px-6 text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <Waves size={14} className="text-brand-cyan" />
+                  <span className="text-sm font-medium text-brand-text">
+                    {city.max_discharge.toLocaleString('pt-BR')}
+                  </span>
                 </div>
               </td>
               <td className="py-4 px-6 text-right">
-                <div className="inline-flex items-center justify-center">
-                   {getTrendIcon(city.trend)}
+                <div className="flex items-center justify-end gap-2 text-xs font-semibold">
+                  <Calendar size={14} className="text-brand-muted" />
+                  <span className="text-brand-text/90">
+                    {new Date(city.peak_date).toLocaleDateString('pt-BR')}
+                  </span>
                 </div>
               </td>
             </tr>
