@@ -17,8 +17,8 @@ export interface User {
 
 export interface ForecastDay {
   date: string;
-  discharge: number;
-  discharge_max: number;
+  discharge: number | null;
+  discharge_max: number | null;
   risk_level: RiskLevel;
 }
 
@@ -41,7 +41,7 @@ export interface RankingCity {
 }
 
 export interface CityAlert {
-  id: number;
+  id: string;
   city_name: string;
   state_code: string;
   latitude: number;
@@ -49,6 +49,15 @@ export interface CityAlert {
   alert_email: string;
   is_active: boolean;
   created_at: string;
+}
+
+export interface FloodStats {
+  safety_percentage: number;
+  monitored_cities: number;
+  cities_analyzed: number;
+  safe_count: number;
+  moderate_count: number;
+  critical_alerts_count: number;
 }
 
 export interface LoginResponse {
@@ -108,7 +117,7 @@ export const getFloodRanking = async (): Promise<RankingCity[]> => {
   return response.data;
 };
 
-export const getFloodStats = async (): Promise<any> => {
+export const getFloodStats = async (): Promise<FloodStats> => {
   const response = await api.get('/flood/stats');
   return response.data;
 };
@@ -124,12 +133,12 @@ export const getAlerts = async (userId: string): Promise<CityAlert[]> => {
   return response.data;
 };
 
-export const updateAlert = async (userId: string, alertId: number, data: any): Promise<CityAlert> => {
+export const updateAlert = async (userId: string, alertId: string, data: any): Promise<CityAlert> => {
   const response = await api.put(`/alerts/${userId}/${alertId}`, data);
   return response.data;
 };
 
-export const deleteAlert = async (userId: string, alertId: number): Promise<void> => {
+export const deleteAlert = async (userId: string, alertId: string): Promise<void> => {
   await api.delete(`/alerts/${userId}/${alertId}`);
 };
 

@@ -47,8 +47,8 @@ const RegisterPage: React.FC = () => {
           <div className="mb-4">
             <img src="/favicon.png" alt="FluviAlert Logo" className="w-20 h-20 rounded-2xl shadow-lg border border-brand-primary/20" />
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tighter mb-1">FluviAlert</h1>
-          <p className="text-brand-muted font-bold uppercase tracking-widest text-[10px]">Intelligence System</p>
+          <h1 className="text-3xl font-bold text-white tracking-tight mb-1">FluviAlert</h1>
+          <p className="text-brand-muted font-semibold uppercase tracking-wider text-xs">Intelligence System</p>
         </div>
 
         <Card className="p-8 bg-brand-card/50 border-brand-border backdrop-blur-xl shadow-2xl">
@@ -113,7 +113,7 @@ const RegisterPage: React.FC = () => {
             <Button
               type="submit"
               variant="primary"
-              className="w-full py-4 text-base font-black shadow-xl shadow-brand-primary/20 hover:scale-[1.02] transition-transform"
+              className="w-full py-4 text-base font-bold shadow-xl shadow-brand-primary/20 hover:scale-[1.02] transition-transform"
               disabled={loading}
               icon={loading ? null : <UserPlus size={18} />}
             >
@@ -131,7 +131,7 @@ const RegisterPage: React.FC = () => {
           </div>
         </Card>
         
-        <p className="mt-8 text-center text-[10px] text-brand-muted font-bold uppercase tracking-[0.2em]">
+        <p className="mt-8 text-center text-xs text-brand-muted font-semibold uppercase tracking-wider">
           © 2026 FluviAlert Intelligence • UFSM
         </p>
       </div>

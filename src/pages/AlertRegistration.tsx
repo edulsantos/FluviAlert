@@ -78,7 +78,7 @@ const AlertRegistration: React.FC = () => {
     }
   }
 
-  const handleRemoveAlert = async (alertId: number) => {
+  const handleRemoveAlert = async (alertId: string) => {
     if (!userId) return
     
     setActionLoading(true)
@@ -95,11 +95,11 @@ const AlertRegistration: React.FC = () => {
   return (
     <div className="space-y-10 animate-in fade-in zoom-in-95 duration-500">
       <div className="flex flex-col gap-2">
-        <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter">
+        <h2 className="text-2xl font-bold text-white tracking-tight">
           Configuração de Alertas
         </h2>
-        <p className="text-brand-muted max-w-2xl font-medium leading-relaxed text-sm md:text-base">
-          Personalize como e onde você deseja receber notificações críticas. Nossa sentinela monitora os níveis fluviais 24/7 para garantir sua segurança.
+        <p className="text-brand-muted max-w-2xl font-medium leading-relaxed text-sm">
+          Personalize como e onde você deseja receber notificações críticas. Monitoramos os níveis fluviais 24/7 para garantir sua segurança.
         </p>
       </div>
 
@@ -164,7 +164,7 @@ const AlertRegistration: React.FC = () => {
           </Card>
 
           <div>
-            <h3 className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-brand-muted mb-5">
+            <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-muted mb-5">
               <MapPin size={14} className="text-brand-primary" />
               Cidades Monitoradas
             </h3>
@@ -175,7 +175,7 @@ const AlertRegistration: React.FC = () => {
               </div>
             ) : alerts.length === 0 ? (
               <div className="brand-card p-10 text-center text-brand-muted opacity-50">
-                <p className="text-sm font-bold uppercase tracking-widest">Nenhuma cidade cadastrada</p>
+                <p className="text-sm font-semibold uppercase tracking-wider">Nenhuma cidade cadastrada</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -190,7 +190,7 @@ const AlertRegistration: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-white">{alert.city_name}, {alert.state_code}</p>
-                        <p className="text-[10px] text-brand-safe font-bold uppercase tracking-tight">
+                        <p className="text-xs text-brand-safe font-semibold uppercase tracking-tight">
                           {alert.is_active ? 'Monitoramento Ativo' : 'Inativo'}
                         </p>
                       </div>
@@ -217,14 +217,14 @@ const AlertRegistration: React.FC = () => {
                   <span className="text-sm font-bold text-white">E-mail de Alerta</span>
                   <CheckCircle2 size={16} className="text-brand-primary" />
                 </div>
-                <p className="text-[10px] text-brand-muted leading-relaxed font-medium">
+                <p className="text-xs text-brand-muted leading-relaxed font-medium">
                   {alertEmail || 'Aguardando definição...'}
                 </p>
               </div>
 
               <div className="p-3 bg-brand-critical/5 border border-brand-critical/10 rounded-xl flex gap-3">
                 <AlertTriangle className="text-brand-warning flex-shrink-0 mt-0.5" size={16} />
-                <p className="text-[9px] text-brand-muted font-bold leading-tight uppercase tracking-wide">
+                <p className="text-xs text-brand-muted font-semibold leading-tight uppercase tracking-wide">
                   Alertas críticos são enviados instantaneamente para o e-mail cadastrado.
                 </p>
               </div>
@@ -237,7 +237,7 @@ const AlertRegistration: React.FC = () => {
                 <div className="p-2 bg-brand-primary/10 rounded-lg">
                   <Shield size={20} className="text-brand-primary" />
                 </div>
-                <h4 className="text-base font-black text-white leading-tight">
+                <h4 className="text-base font-bold text-white leading-tight">
                   Segurança em Tempo Real
                 </h4>
               </div>
@@ -246,7 +246,7 @@ const AlertRegistration: React.FC = () => {
               </p>
               <div className="mt-4 flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-brand-safe shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
-                <span className="text-xs font-semibold text-brand-safe">1.248 estações ativas</span>
+                <span className="text-xs font-semibold text-brand-safe">{alerts.length} cidades monitoradas</span>
               </div>
             </div>
           </div>

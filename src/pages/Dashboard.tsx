@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { getFloodRanking, getFloodStats } from '../services/api'
-import type { RankingCity } from '../services/api'
+import type { RankingCity, FloodStats } from '../services/api'
 import SafetyGauge from '../components/dashboard/SafetyGauge'
 import RiskTable from '../components/dashboard/RiskTable'
 import MetricCard from '../components/dashboard/MetricCard'
@@ -9,7 +9,7 @@ import { Waves, Zap, BarChart3, Download, ExternalLink, Loader2 } from 'lucide-r
 
 const Dashboard: React.FC = () => {
   const [ranking, setRanking] = useState<RankingCity[]>([])
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] = useState<FloodStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -44,17 +44,17 @@ const Dashboard: React.FC = () => {
             className="absolute inset-0 w-full h-full object-cover brightness-50 group-hover:scale-105 transition-transform duration-1000"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-brand-bg via-brand-bg/40 to-transparent p-6 lg:p-10 flex flex-col justify-end">
-            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit mb-4 border ${
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider w-fit mb-4 border ${
               stats?.critical_alerts_count > 0 
                 ? 'bg-brand-critical/20 text-brand-critical border-brand-critical' 
                 : 'bg-brand-safe/20 text-brand-safe border-brand-safe'
             }`}>
               {stats?.critical_alerts_count > 0 ? 'Alerta Crítico Ativo' : 'Monitoramento Estável'}
             </span>
-            <h2 className="text-3xl lg:text-5xl font-black text-white tracking-tighter mb-4 max-w-md">
+            <h2 className="text-2xl lg:text-4xl font-bold text-white tracking-tight mb-4 max-w-md">
               {stats?.critical_alerts_count > 0 ? 'Risco Identificado' : 'Sistema Operacional'}
             </h2>
-            <p className="text-brand-muted text-sm lg:text-lg max-w-xl font-medium">
+            <p className="text-brand-muted text-sm lg:text-base max-w-xl font-medium">
               {stats?.critical_alerts_count > 0 
                 ? `Atenção: ${stats.critical_alerts_count} zonas monitoradas apresentam níveis de vazão acima da média de segurança.`
                 : `As condições hidrológicas atuais permanecem dentro dos parâmetros de segurança em ${stats?.safety_percentage || 100}% das zonas.`
@@ -74,8 +74,8 @@ const Dashboard: React.FC = () => {
 
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h3 className="text-xl lg:text-2xl font-black tracking-tight text-white">Ranking de Risco (Top 20 Cidades)</h3>
-          <p className="text-xs lg:text-sm text-brand-muted font-medium mt-1">Análise baseada na vazão máxima projetada para o período.</p>
+          <h3 className="text-xl lg:text-2xl font-bold tracking-tight text-white">Ranking de Risco (Top 20 Cidades)</h3>
+          <p className="text-xs lg:text-sm text-brand-muted font-medium mt-1">Análise baseada na vazão máxima do rio projetada para o período — dados hidrológicos, não pluviométricos.</p>
         </div>
         <div className="flex gap-2 lg:gap-4">
           <Button variant="outline" size="sm" icon={<Download size={16} />}>Exportar</Button>
@@ -87,7 +87,7 @@ const Dashboard: React.FC = () => {
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center text-brand-muted gap-4 py-20">
             <Loader2 size={48} className="animate-spin text-brand-primary" />
-            <p className="font-bold uppercase tracking-widest text-[10px]">Sincronizando com satélites...</p>
+            <p className="font-semibold uppercase tracking-wider text-xs">Sincronizando com satélites...</p>
           </div>
         ) : error ? (
           <div className="flex-1 flex flex-col items-center justify-center text-brand-critical gap-2 p-8 text-center">
@@ -101,23 +101,23 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
         <MetricCard 
-          label="Estações Ativas" 
-          value={stats?.active_stations?.toLocaleString('pt-BR') || '---'} 
+          label="Cidades Monitoradas" 
+          value={stats?.monitored_cities?.toString() || '---'} 
           icon={<Waves size={24} />} 
         />
         <MetricCard 
-          label="Latência de Dados" 
-          value={stats?.data_latency || '---'} 
+          label="Cidades Seguras" 
+          value={stats?.safe_count?.toString() || '---'} 
           icon={<Zap size={24} />} 
         />
         <MetricCard 
-          label="Previsões / Dia" 
-          value={stats?.processed_forecasts || '---'} 
+          label="Alertas Moderados" 
+          value={stats?.moderate_count?.toString() || '---'} 
           icon={<BarChart3 size={24} />} 
         />
       </div>
 
-      <footer className="pt-8 border-t border-brand-border flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-muted">
+      <footer className="pt-8 border-t border-brand-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold uppercase tracking-wider text-brand-muted">
         <div>© 2026 FluviAlert Intelligence Systems</div>
         <div className="flex gap-8">
           <a href="#" className="hover:text-brand-text transition-colors">Privacidade</a>

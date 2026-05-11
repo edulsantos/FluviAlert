@@ -12,11 +12,11 @@ const RiskTable: React.FC<RiskTableProps> = ({ cities }) => {
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="text-[10px] uppercase tracking-widest text-brand-muted font-bold border-b border-brand-border">
+          <tr className="text-xs uppercase tracking-wider text-brand-muted font-semibold border-b border-brand-border">
             <th className="py-4 px-6">Posição</th>
             <th className="py-4 px-6">Cidade / UF</th>
             <th className="py-4 px-6 text-center">Nível de Risco</th>
-            <th className="py-4 px-6 text-center">Vazão Máx. (m³/s)</th>
+            <th className="py-4 px-6 text-center">Vazão Máx. do Rio (m³/s)</th>
             <th className="py-4 px-6 text-right">Data do Pico</th>
           </tr>
         </thead>
@@ -31,7 +31,7 @@ const RiskTable: React.FC<RiskTableProps> = ({ cities }) => {
                   <MapPin size={14} className="text-brand-primary" />
                   <div>
                     <span className="text-sm font-semibold text-white block">{city.city_name}</span>
-                    <span className="text-[10px] text-brand-muted uppercase font-bold">{city.state_code}</span>
+                    <span className="text-xs text-brand-muted uppercase font-semibold">{city.state_code}</span>
                   </div>
                 </div>
               </td>

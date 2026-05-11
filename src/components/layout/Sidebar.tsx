@@ -45,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <h1 className="text-xl font-bold bg-gradient-to-r from-white to-brand-muted bg-clip-text text-transparent leading-none">
                 FluviAlert
               </h1>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-brand-muted font-bold mt-1">
+              <p className="text-xs uppercase tracking-wider text-brand-muted font-semibold mt-1">
                 Intelligence
               </p>
             </div>
@@ -84,7 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {/* Status do sistema */}
         <div className="flex-shrink-0 p-4">
           <div className="rounded-xl border border-brand-border/50 bg-brand-bg/50 p-4">
-            <p className="text-[9px] uppercase tracking-widest text-brand-muted font-bold mb-2">
+            <p className="text-xs uppercase tracking-wider text-brand-muted font-semibold mb-2">
               Status do Sistema
             </p>
             <div className="flex items-center gap-2">

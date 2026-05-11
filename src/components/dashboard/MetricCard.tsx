@@ -21,9 +21,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
         {icon}
       </div>
       <div>
-        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-muted mb-1">{label}</h4>
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-brand-muted mb-1">{label}</h4>
         <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-black text-white">{value}</span>
+          <span className="text-2xl font-bold text-white">{value}</span>
           {unit && <span className="text-xs font-semibold text-brand-muted">{unit}</span>}
         </div>
       </div>

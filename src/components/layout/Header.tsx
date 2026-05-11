@@ -111,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             <div className="absolute right-0 mt-2 w-80 bg-brand-card border border-brand-border rounded-xl shadow-2xl z-50 overflow-hidden">
               <div className="px-4 py-3 border-b border-brand-border flex items-center justify-between">
                 <p className="text-sm font-bold text-white">Notificações</p>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-brand-primary bg-brand-primary/10 px-2 py-0.5 rounded-full">
+                <span className="text-xs font-semibold uppercase tracking-wider text-brand-primary bg-brand-primary/10 px-2 py-0.5 rounded-full">
                   {notifications.length} novas
                 </span>
               </div>
@@ -124,8 +124,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-brand-text leading-snug">{n.title}</p>
-                        <p className="text-[11px] text-brand-muted mt-0.5 leading-snug">{n.desc}</p>
-                        <p className="text-[10px] text-brand-muted/60 mt-1 font-medium">{n.time}</p>
+                        <p className="text-xs text-brand-muted mt-0.5 leading-snug">{n.desc}</p>
+                        <p className="text-xs text-brand-muted/60 mt-1 font-medium">{n.time}</p>
                       </div>
                     </div>
                   </div>
@@ -148,7 +148,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 <p className="text-sm font-semibold text-brand-text group-hover:text-brand-primary transition-colors leading-tight">
                   {userName}
                 </p>
-                <p className="text-[10px] text-brand-muted uppercase tracking-wider font-bold">
+                <p className="text-xs text-brand-muted uppercase tracking-wider font-semibold">
                   Usuário Ativo
                 </p>
               </div>

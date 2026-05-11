@@ -10,7 +10,7 @@ const SafetyGauge: React.FC<SafetyGaugeProps> = ({ percentage, trend }) => {
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-brand-card border border-brand-border rounded-xl h-full relative overflow-hidden group">
       <div className="absolute top-4 left-4">
-        <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">Nível Global de Segurança</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-brand-muted">Nível Global de Segurança</h3>
       </div>
 
       <div className="relative w-48 h-48 flex items-center justify-center">
@@ -38,7 +38,7 @@ const SafetyGauge: React.FC<SafetyGaugeProps> = ({ percentage, trend }) => {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-5xl font-black text-white tracking-tighter">{percentage}%</span>
+          <span className="text-4xl font-bold text-white tracking-tight">{percentage}%</span>
         </div>
       </div>
 
