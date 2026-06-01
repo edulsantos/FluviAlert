@@ -35,11 +35,8 @@ const LoginPage: React.FC = () => {
       
       <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-700 relative z-10">
         <div className="flex flex-col items-center mb-8">
-          <div className="mb-4">
-            <img src="/favicon.png" alt="FluviAlert Logo" className="w-20 h-20 rounded-2xl shadow-lg border border-brand-primary/20" />
-          </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight mb-1">FluviAlert</h1>
-          <p className="text-brand-muted font-semibold uppercase tracking-wider text-xs">Intelligence System</p>
+          <h1 className="text-5xl font-black text-brand-primary tracking-tighter mb-2 drop-shadow-sm">FluviAlert</h1>
+          <p className="text-brand-muted font-bold uppercase tracking-widest text-xs">Intelligence System</p>
         </div>
 
         <Card className="p-8 bg-brand-card/50 border-brand-border backdrop-blur-xl shadow-2xl">

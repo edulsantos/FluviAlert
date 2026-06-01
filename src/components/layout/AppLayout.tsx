@@ -8,10 +8,7 @@ const AppLayout: React.FC = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const userId = localStorage.getItem('user_id')
-    if (!userId) {
-      navigate('/login')
-    }
+    // Cadastro para Alertas requires login, but the check is handled inside the component itself.
   }, [navigate])
 
   return (
