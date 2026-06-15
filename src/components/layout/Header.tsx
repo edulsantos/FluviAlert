@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Search, Bell, Menu, User, LogOut, AlertTriangle, LogIn } from 'lucide-react'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
+import { Bell, Menu, User, LogOut, AlertTriangle, LogIn, Save, X, Loader2 } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
 import Button from '../ui/Button'
 
-import { getFloodRanking } from '../../services/api'
+import { getFloodRanking, updateUser } from '../../services/api'
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -16,18 +16,36 @@ const typeStyles: Record<string, string> = {
   safe:     'text-brand-safe     bg-brand-safe/10',
 }
 
+interface HeaderNotification {
+  id: string
+  type: keyof typeof typeStyles
+  title: string
+  desc: string
+  time: string
+  icon: React.ReactNode
+}
+
+interface ApiErrorResponse {
+  response?: {
+    data?: {
+      detail?: unknown
+    }
+  }
+}
+
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
-  const location = useLocation()
   const navigate = useNavigate()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotifOpen, setIsNotifOpen] = useState(false)
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
   const [userName, setUserName] = useState<string | null>(null)
-  const [notifications, setNotifications] = useState<any[]>([])
+  const [profileName, setProfileName] = useState('')
+  const [profileError, setProfileError] = useState('')
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [notifications, setNotifications] = useState<HeaderNotification[]>([])
 
   const profileRef = useRef<HTMLDivElement>(null)
   const notifRef   = useRef<HTMLDivElement>(null)
-
-  const hideSearch = location.pathname === '/alerts' || location.pathname === '/about' || location.pathname === '/login' || location.pathname === '/register'
 
   useEffect(() => {
     setUserName(localStorage.getItem('user_name'))
@@ -38,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         const ranking = await getFloodRanking()
         const criticalCities = ranking.filter(c => c.risk_level === 'alto' || c.risk_level === 'moderado')
         
-        const newNotifs = criticalCities.slice(0, 5).map(c => ({
+        const newNotifs: HeaderNotification[] = criticalCities.slice(0, 5).map(c => ({
           id: c.city_name,
           type: c.risk_level === 'alto' ? 'critical' : 'warning',
           title: `${c.risk_level === 'alto' ? 'Nível Crítico' : 'Atenção'} — ${c.city_name}`,
@@ -60,7 +78,56 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [location])
+  }, [])
+
+  const openProfileEditor = () => {
+    setProfileName(userName || '')
+    setProfileError('')
+    setIsProfileOpen(false)
+    setIsEditProfileOpen(true)
+  }
+
+  const closeProfileEditor = () => {
+    if (isSavingProfile) return
+    setIsEditProfileOpen(false)
+    setProfileError('')
+  }
+
+  const handleProfileSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const trimmedName = profileName.trim()
+    if (!trimmedName) {
+      setProfileError('Informe um nome para salvar.')
+      return
+    }
+
+    if (trimmedName === userName) {
+      setIsEditProfileOpen(false)
+      return
+    }
+
+    const userId = localStorage.getItem('user_id')
+    if (!userId) {
+      setProfileError('Faça login novamente para editar o perfil.')
+      return
+    }
+
+    setIsSavingProfile(true)
+    setProfileError('')
+    try {
+      const updatedUser = await updateUser(userId, { name: trimmedName })
+      const nextName = updatedUser.name || trimmedName
+      localStorage.setItem('user_name', nextName)
+      setUserName(nextName)
+      setIsEditProfileOpen(false)
+    } catch (err: unknown) {
+      const detail = (err as ApiErrorResponse).response?.data?.detail
+      setProfileError(typeof detail === 'string' ? detail : 'Não foi possível atualizar o perfil.')
+    } finally {
+      setIsSavingProfile(false)
+    }
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('user_id')
@@ -76,22 +143,12 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
       {/* Left side */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <button
+          type="button"
           onClick={onMenuClick}
           className="lg:hidden p-2 text-brand-muted hover:text-brand-text transition-colors flex-shrink-0"
         >
           <Menu size={22} />
         </button>
-
-        {!hideSearch && (
-          <div className="relative w-full max-w-sm hidden sm:block group">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-primary transition-colors" />
-            <input
-              type="text"
-              placeholder="Pesquise por cidades em risco..."
-              className="w-full bg-brand-sidebar border border-transparent hover:border-brand-border focus:border-brand-primary py-2 pl-9 pr-4 rounded-lg text-xs text-brand-text placeholder:text-brand-muted focus:outline-none focus:ring-1 focus:ring-brand-primary/50 transition-all"
-            />
-          </div>
-        )}
       </div>
 
       {/* Right side */}
@@ -100,6 +157,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         {/* Notificações */}
         <div className="relative" ref={notifRef}>
           <button
+            type="button"
             onClick={() => { setIsNotifOpen(!isNotifOpen); setIsProfileOpen(false) }}
             className="relative p-2 text-brand-muted hover:text-brand-text transition-colors"
           >
@@ -141,6 +199,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         <div className="relative" ref={profileRef}>
           {userName ? (
             <button
+              type="button"
               onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false) }}
               className="flex items-center gap-3 cursor-pointer group"
             >
@@ -166,17 +225,82 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
           {isProfileOpen && userName && (
             <div className="absolute right-0 mt-2 w-48 bg-brand-card border border-brand-border rounded-xl shadow-2xl py-2 z-50">
-              <button className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-primary/10 hover:text-brand-primary transition-colors flex items-center gap-2">
+              <button
+                type="button"
+                onClick={openProfileEditor}
+                className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-primary/10 hover:text-brand-primary transition-colors flex items-center gap-2"
+              >
                 <User size={15} /> Editar Perfil
               </button>
               <div className="h-px bg-brand-border/50 my-1" />
-              <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-brand-critical hover:bg-brand-critical/10 transition-colors flex items-center gap-2">
+              <button type="button" onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-brand-critical hover:bg-brand-critical/10 transition-colors flex items-center gap-2">
                 <LogOut size={15} /> Sair
               </button>
             </div>
           )}
         </div>
       </div>
+
+      {isEditProfileOpen && userName && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-brand-bg/80 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md rounded-xl border border-brand-border bg-brand-card shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-brand-border px-5 py-4">
+              <div>
+                <p className="text-sm font-bold text-white">Editar Perfil</p>
+                <p className="mt-1 text-xs font-medium text-brand-muted">Atualize o nome exibido no sistema.</p>
+              </div>
+              <button
+                type="button"
+                onClick={closeProfileEditor}
+                disabled={isSavingProfile}
+                className="rounded-lg p-2 text-brand-muted transition-colors hover:bg-brand-border hover:text-brand-text disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Fechar edição de perfil"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleProfileSubmit} className="space-y-4 p-5">
+              <div className="space-y-2">
+                <label htmlFor="profile-name" className="text-xs font-semibold uppercase tracking-wider text-brand-muted">
+                  Nome
+                </label>
+                <input
+                  id="profile-name"
+                  type="text"
+                  value={profileName}
+                  onChange={(event) => setProfileName(event.target.value)}
+                  className="w-full rounded-lg border border-brand-border bg-brand-sidebar px-4 py-2.5 text-sm text-brand-text placeholder:text-brand-muted transition-all focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary/50"
+                  placeholder="Seu nome"
+                  autoFocus
+                  disabled={isSavingProfile}
+                />
+              </div>
+
+              {profileError && (
+                <div className="rounded-lg border border-brand-critical/20 bg-brand-critical/10 p-3 text-xs font-bold text-brand-critical">
+                  {profileError}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="ghost" size="sm" onClick={closeProfileEditor} disabled={isSavingProfile}>
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  icon={isSavingProfile ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  disabled={isSavingProfile}
+                >
+                  {isSavingProfile ? 'Salvando...' : 'Salvar'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

@@ -5,13 +5,16 @@ import SafetyGauge from '../components/dashboard/SafetyGauge'
 import RiskTable from '../components/dashboard/RiskTable'
 import MetricCard from '../components/dashboard/MetricCard'
 import Button from '../components/ui/Button'
-import { Waves, Zap, BarChart3, Download, ExternalLink, Loader2 } from 'lucide-react'
+import { Waves, Zap, BarChart3, Download, Loader2 } from 'lucide-react'
 
 const Dashboard: React.FC = () => {
   const [ranking, setRanking] = useState<RankingCity[]>([])
   const [stats, setStats] = useState<FloodStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+
+  const criticalAlertsCount = stats?.critical_alerts_count ?? 0
+  const safetyPercentage = stats?.safety_percentage ?? 100
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,6 +36,48 @@ const Dashboard: React.FC = () => {
     fetchData()
   }, [])
 
+  const escapeCsvValue = (value: string | number) => {
+    const text = String(value)
+    return `"${text.replace(/"/g, '""')}"`
+  }
+
+  const handleExportRanking = () => {
+    if (!ranking.length) return
+
+    const headers = [
+      'Posição',
+      'Cidade',
+      'UF',
+      'Nível de Risco',
+      'Vazão Máx. do Rio (m³/s)',
+      'Data do Pico',
+    ]
+
+    const rows = ranking.map((city, index) => [
+      index + 1,
+      city.city_name,
+      city.state_code,
+      city.risk_level,
+      city.max_discharge.toLocaleString('pt-BR'),
+      new Date(city.peak_date).toLocaleDateString('pt-BR'),
+    ])
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map(escapeCsvValue).join(';'))
+      .join('\n')
+
+    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+
+    link.href = url
+    link.download = `ranking-risco-fluvial-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:h-80">
@@ -45,19 +90,19 @@ const Dashboard: React.FC = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-brand-bg via-brand-bg/40 to-transparent p-6 lg:p-10 flex flex-col justify-end">
             <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider w-fit mb-4 border ${
-              stats?.critical_alerts_count > 0 
+              criticalAlertsCount > 0 
                 ? 'bg-brand-critical/20 text-brand-critical border-brand-critical' 
                 : 'bg-brand-safe/20 text-brand-safe border-brand-safe'
             }`}>
-              {stats?.critical_alerts_count > 0 ? 'Alerta Crítico Ativo' : 'Monitoramento Estável'}
+              {criticalAlertsCount > 0 ? 'Alerta Crítico Ativo' : 'Monitoramento Estável'}
             </span>
             <h2 className="text-2xl lg:text-4xl font-bold text-white tracking-tight mb-4 max-w-md">
-              {stats?.critical_alerts_count > 0 ? 'Risco Identificado' : 'Sistema Operacional'}
+              {criticalAlertsCount > 0 ? 'Risco Identificado' : 'Sistema Operacional'}
             </h2>
             <p className="text-brand-muted text-sm lg:text-base max-w-xl font-medium">
-              {stats?.critical_alerts_count > 0 
-                ? `Atenção: ${stats.critical_alerts_count} zonas monitoradas apresentam níveis de vazão acima da média de segurança.`
-                : `As condições hidrológicas atuais permanecem dentro dos parâmetros de segurança em ${stats?.safety_percentage || 100}% das zonas.`
+              {criticalAlertsCount > 0 
+                ? `Atenção: ${criticalAlertsCount} zonas monitoradas apresentam níveis de vazão acima da média de segurança.`
+                : `As condições hidrológicas atuais permanecem dentro dos parâmetros de segurança em ${safetyPercentage}% das zonas.`
               }
             </p>
           </div>
@@ -66,8 +111,8 @@ const Dashboard: React.FC = () => {
         {/* Safety Gauge */}
         <div className="lg:col-span-4 h-full">
           <SafetyGauge 
-            percentage={stats?.safety_percentage || 100} 
-            trend={stats?.safety_percentage > 90 ? "+1.2% estabilidade" : "Risco em análise"} 
+            percentage={safetyPercentage} 
+            trend={safetyPercentage > 90 ? "+1.2% estabilidade" : "Risco em análise"} 
           />
         </div>
       </div>
@@ -78,8 +123,15 @@ const Dashboard: React.FC = () => {
           <p className="text-xs lg:text-sm text-brand-muted font-medium mt-1">Análise baseada na vazão máxima do rio projetada para o período — dados hidrológicos, não pluviométricos.</p>
         </div>
         <div className="flex gap-2 lg:gap-4">
-          <Button variant="outline" size="sm" icon={<Download size={16} />}>Exportar</Button>
-          <Button variant="primary" size="sm" icon={<ExternalLink size={16} />}>Detalhes</Button>
+          <Button
+            variant="outline"
+            size="sm"
+            icon={<Download size={16} />}
+            onClick={handleExportRanking}
+            disabled={loading || ranking.length === 0}
+          >
+            Exportar
+          </Button>
         </div>
       </div>
 
