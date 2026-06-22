@@ -4,6 +4,8 @@ import { registerUser } from '../services/api';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
+import ThemeToggle from '../components/ui/ThemeToggle';
+import { getApiErrorMessage } from '../utils/errors';
 import { Mail, Lock, User, UserPlus, ArrowLeft } from 'lucide-react';
 
 const RegisterPage: React.FC = () => {
@@ -29,8 +31,8 @@ const RegisterPage: React.FC = () => {
       await registerUser({ name, email, password });
       // Após o registro, redirecionar para o login para obter o Token JWT
       navigate('/login', { state: { message: 'Conta criada com sucesso! Faça login para continuar.' } });
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Erro ao criar conta. Tente novamente.');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Erro ao criar conta. Tente novamente.'));
     } finally {
       setLoading(false);
     }
@@ -38,6 +40,8 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-brand-bg flex items-center justify-center p-4 relative overflow-hidden">
+      <ThemeToggle className="absolute right-4 top-4 z-20" />
+
       {/* Background elements for premium look */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-cyan/5 rounded-full blur-[120px]"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-primary/5 rounded-full blur-[120px]"></div>
@@ -57,7 +61,7 @@ const RegisterPage: React.FC = () => {
               <ArrowLeft size={18} />
             </button>
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Solicitar Credenciais</h2>
+              <h2 className="text-xl font-bold text-brand-text tracking-tight">Solicitar Credenciais</h2>
               <p className="text-brand-muted text-sm mt-1 font-medium">Cadastre-se para acessar o monitoramento</p>
             </div>
           </div>

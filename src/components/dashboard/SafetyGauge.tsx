@@ -38,7 +38,7 @@ const SafetyGauge: React.FC<SafetyGaugeProps> = ({ percentage, trend }) => {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-4xl font-bold text-white tracking-tight">{percentage}%</span>
+          <span className="text-4xl font-bold text-brand-text tracking-tight">{percentage}%</span>
         </div>
       </div>
 

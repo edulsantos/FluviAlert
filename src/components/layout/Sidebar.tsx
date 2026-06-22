@@ -51,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            className="lg:hidden p-2 -mr-2 text-brand-muted hover:text-white transition-colors"
+            className="lg:hidden p-2 -mr-2 text-brand-muted hover:text-brand-text transition-colors"
           >
             <X size={18} />
           </button>

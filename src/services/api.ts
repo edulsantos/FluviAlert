@@ -67,6 +67,30 @@ export interface LoginResponse {
   user:         User;
 }
 
+export interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export type UpdateUserPayload = Partial<{
+  name: string;
+  email: string;
+  password: string;
+  is_active: boolean;
+}>;
+
+export type UpdateAlertPayload = Partial<{
+  city_name: string;
+  alert_email: string;
+  is_active: boolean;
+}>;
+
 // Interceptor para adicionar o token em todas as requisições
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
@@ -77,12 +101,12 @@ api.interceptors.request.use((config) => {
 });
 
 // Funções de Usuário
-export const registerUser = async (data: any): Promise<User> => {
+export const registerUser = async (data: RegisterPayload): Promise<User> => {
   const response = await api.post('/users/register', data);
   return response.data;
 };
 
-export const loginUser = async (data: any): Promise<LoginResponse> => {
+export const loginUser = async (data: LoginPayload): Promise<LoginResponse> => {
   const response = await api.post('/users/login', data);
   if (response.data.access_token) {
     localStorage.setItem('token', response.data.access_token);
@@ -97,7 +121,7 @@ export const getUser = async (userId: string): Promise<User> => {
   return response.data;
 };
 
-export const updateUser = async (userId: string, data: any): Promise<User> => {
+export const updateUser = async (userId: string, data: UpdateUserPayload): Promise<User> => {
   const response = await api.put(`/users/${userId}`, data);
   return response.data;
 };
@@ -133,7 +157,7 @@ export const getAlerts = async (userId: string): Promise<CityAlert[]> => {
   return response.data;
 };
 
-export const updateAlert = async (userId: string, alertId: string, data: any): Promise<CityAlert> => {
+export const updateAlert = async (userId: string, alertId: string, data: UpdateAlertPayload): Promise<CityAlert> => {
   const response = await api.put(`/alerts/${userId}/${alertId}`, data);
   return response.data;
 };

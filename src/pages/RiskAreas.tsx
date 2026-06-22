@@ -5,6 +5,7 @@ import Card from '../components/ui/Card'
 import RiskBadge from '../components/ui/RiskBadge'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
+import { getApiErrorMessage } from '../utils/errors'
 import { 
   Search, 
   MapPin, 
@@ -30,9 +31,9 @@ const RiskAreas: React.FC = () => {
     try {
       const data = await searchFlood(searchTerm)
       setCityData(data)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err)
-      setError('Cidade não encontrada ou erro na busca.')
+      setError(getApiErrorMessage(err, 'Cidade não encontrada ou erro na busca.'))
       setCityData(null)
     } finally {
       setLoading(false)
@@ -42,7 +43,7 @@ const RiskAreas: React.FC = () => {
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-white tracking-tight">Consulta por Região</h2>
+        <h2 className="text-2xl font-bold text-brand-text tracking-tight">Consulta por Região</h2>
         <p className="text-sm text-brand-muted max-w-2xl font-medium">
           Busque por uma cidade para visualizar a projeção hidrológica detalhada para os próximos 7 dias.
           <span className="text-brand-muted/70 ml-1">Os dados referem-se à vazão fluvial (m³/s), não à precipitação.</span>
@@ -85,7 +86,7 @@ const RiskAreas: React.FC = () => {
                 <MapPin size={32} />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-white leading-none">
+                <h3 className="text-2xl font-bold text-brand-text leading-none">
                   {cityData.city_name}
                 </h3>
                 <p className="text-brand-muted font-semibold uppercase tracking-wider text-xs mt-1">
@@ -112,7 +113,7 @@ const RiskAreas: React.FC = () => {
                   <Calendar size={20} className="group-hover:text-brand-primary transition-colors" />
                 </div>
                 <div className="mb-4">
-                  <p className="text-lg font-bold text-white">{day.discharge != null ? day.discharge.toFixed(0) : '—'}</p>
+                  <p className="text-lg font-bold text-brand-text">{day.discharge != null ? day.discharge.toFixed(0) : '—'}</p>
                   <p className="text-[10px] font-medium text-brand-muted uppercase tracking-tight">m³/s vazão do rio</p>
                 </div>
                 <RiskBadge level={day.risk_level} className="w-full text-center" />
@@ -125,14 +126,14 @@ const RiskAreas: React.FC = () => {
           </div>
 
           <div className="brand-card p-6 bg-gradient-to-br from-brand-card to-brand-bg">
-            <h4 className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider mb-4">
+            <h4 className="flex items-center gap-2 text-sm font-bold text-brand-text uppercase tracking-wider mb-4">
               <Info size={16} className="text-brand-cyan" />
               Análise Preditiva
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="space-y-2">
                 <p className="text-xs text-brand-muted font-medium">Vazão Pico do Rio</p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-brand-text">
                   {Math.max(...cityData.forecast.filter(d => d.discharge_max != null).map(d => d.discharge_max!)).toFixed(1)} <span className="text-sm text-brand-muted">m³/s</span>
                 </p>
               </div>

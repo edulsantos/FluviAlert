@@ -23,7 +23,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
       <div>
         <h4 className="text-xs font-semibold uppercase tracking-wider text-brand-muted mb-1">{label}</h4>
         <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-bold text-white">{value}</span>
+          <span className="text-2xl font-bold text-brand-text">{value}</span>
           {unit && <span className="text-xs font-semibold text-brand-muted">{unit}</span>}
         </div>
       </div>

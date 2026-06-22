@@ -2,6 +2,40 @@
 @config "../tailwind.config.js";
 
 @layer base {
+  :root {
+    color-scheme: dark;
+    --brand-bg: 10 15 30;
+    --brand-sidebar: 13 21 38;
+    --brand-card: 17 28 51;
+    --brand-border: 30 45 74;
+    --brand-primary: 59 130 246;
+    --brand-cyan: 6 182 212;
+    --brand-critical: 192 57 43;
+    --brand-warning: 230 126 34;
+    --brand-safe: 16 185 129;
+    --brand-text: 226 232 240;
+    --brand-muted: 100 116 139;
+  }
+
+  :root[data-theme='light'] {
+    color-scheme: light;
+    --brand-bg: 245 248 252;
+    --brand-sidebar: 255 255 255;
+    --brand-card: 255 255 255;
+    --brand-border: 204 216 232;
+    --brand-primary: 37 99 235;
+    --brand-cyan: 8 145 178;
+    --brand-critical: 185 28 28;
+    --brand-warning: 194 120 3;
+    --brand-safe: 5 150 105;
+    --brand-text: 15 23 42;
+    --brand-muted: 71 85 105;
+  }
+
+  html {
+    @apply bg-brand-bg;
+  }
+
   body {
     @apply bg-brand-bg text-brand-text font-sans;
   }
@@ -9,7 +43,7 @@
 
 @layer components {
   .brand-card {
-    @apply bg-brand-card border border-brand-border rounded-xl;
+    @apply bg-brand-card border border-brand-border rounded-xl shadow-sm shadow-slate-950/5;
   }
 }
 

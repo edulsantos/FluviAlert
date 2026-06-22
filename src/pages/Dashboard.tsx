@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
             alt="Flood monitoring" 
             className="absolute inset-0 w-full h-full object-cover brightness-50 group-hover:scale-105 transition-transform duration-1000"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-bg via-brand-bg/40 to-transparent p-6 lg:p-10 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/40 to-transparent p-6 lg:p-10 flex flex-col justify-end">
             <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider w-fit mb-4 border ${
               criticalAlertsCount > 0 
                 ? 'bg-brand-critical/20 text-brand-critical border-brand-critical' 
@@ -99,7 +99,7 @@ const Dashboard: React.FC = () => {
             <h2 className="text-2xl lg:text-4xl font-bold text-white tracking-tight mb-4 max-w-md">
               {criticalAlertsCount > 0 ? 'Risco Identificado' : 'Sistema Operacional'}
             </h2>
-            <p className="text-brand-muted text-sm lg:text-base max-w-xl font-medium">
+            <p className="text-slate-200 text-sm lg:text-base max-w-xl font-medium">
               {criticalAlertsCount > 0 
                 ? `Atenção: ${criticalAlertsCount} zonas monitoradas apresentam níveis de vazão acima da média de segurança.`
                 : `As condições hidrológicas atuais permanecem dentro dos parâmetros de segurança em ${safetyPercentage}% das zonas.`
@@ -119,7 +119,7 @@ const Dashboard: React.FC = () => {
 
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h3 className="text-xl lg:text-2xl font-bold tracking-tight text-white">Ranking de Risco (Top 20 Cidades)</h3>
+          <h3 className="text-xl lg:text-2xl font-bold tracking-tight text-brand-text">Ranking de Risco (Top 20 Cidades)</h3>
           <p className="text-xs lg:text-sm text-brand-muted font-medium mt-1">Análise baseada na vazão máxima do rio projetada para o período — dados hidrológicos, não pluviométricos.</p>
         </div>
         <div className="flex gap-2 lg:gap-4">

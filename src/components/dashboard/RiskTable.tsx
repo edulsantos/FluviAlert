@@ -30,7 +30,7 @@ const RiskTable: React.FC<RiskTableProps> = ({ cities }) => {
                 <div className="flex items-center gap-3">
                   <MapPin size={14} className="text-brand-primary" />
                   <div>
-                    <span className="text-sm font-semibold text-white block">{city.city_name}</span>
+                    <span className="text-sm font-semibold text-brand-text block">{city.city_name}</span>
                     <span className="text-xs text-brand-muted uppercase font-semibold">{city.state_code}</span>
                   </div>
                 </div>

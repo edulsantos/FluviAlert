@@ -4,6 +4,8 @@ import { loginUser } from '../services/api';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
+import ThemeToggle from '../components/ui/ThemeToggle';
+import { getApiErrorMessage } from '../utils/errors';
 import { Mail, Lock, LogIn } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
@@ -20,8 +22,8 @@ const LoginPage: React.FC = () => {
     try {
       await loginUser({ email, password });
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Erro ao fazer login. Verifique suas credenciais.');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Erro ao fazer login. Verifique suas credenciais.'));
     } finally {
       setLoading(false);
     }
@@ -29,6 +31,8 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-brand-bg flex items-center justify-center p-4 relative overflow-hidden">
+      <ThemeToggle className="absolute right-4 top-4 z-20" />
+
       {/* Background elements for premium look */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-primary/5 rounded-full blur-[120px]"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-cyan/5 rounded-full blur-[120px]"></div>
@@ -41,7 +45,7 @@ const LoginPage: React.FC = () => {
 
         <Card className="p-8 bg-brand-card/50 border-brand-border backdrop-blur-xl shadow-2xl">
           <div className="text-center mb-8">
-            <h2 className="text-xl font-bold text-white tracking-tight">Bem-vindo de volta</h2>
+            <h2 className="text-xl font-bold text-brand-text tracking-tight">Bem-vindo de volta</h2>
             <p className="text-brand-muted text-sm mt-1 font-medium">Acesse sua conta para monitorar riscos</p>
           </div>
 

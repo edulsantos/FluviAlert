@@ -1,3 +1,5 @@
+const brandColor = (name) => `rgb(var(--brand-${name}) / <alpha-value>)`
+
 export default {
   content: [
     "./index.html",
@@ -7,17 +9,17 @@ export default {
     extend: {
       colors: {
         brand: {
-          bg:       '#0a0f1e',
-          sidebar:  '#0d1526',
-          card:     '#111c33',
-          border:   '#1e2d4a',
-          primary:  '#3b82f6',
-          cyan:     '#06b6d4',
-          critical: '#c0392b',
-          warning:  '#e67e22',
-          safe:     '#10b981',
-          text:     '#e2e8f0',
-          muted:    '#64748b',
+          bg:       brandColor('bg'),
+          sidebar:  brandColor('sidebar'),
+          card:     brandColor('card'),
+          border:   brandColor('border'),
+          primary:  brandColor('primary'),
+          cyan:     brandColor('cyan'),
+          critical: brandColor('critical'),
+          warning:  brandColor('warning'),
+          safe:     brandColor('safe'),
+          text:     brandColor('text'),
+          muted:    brandColor('muted'),
         }
       },
       fontFamily: {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { getAlerts, createAlert, deleteAlert } from '../services/api'
 import type { CityAlert } from '../services/api'
 import Card from '../components/ui/Card'
@@ -19,6 +19,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { getApiErrorMessage } from '../utils/errors'
 
 const AlertRegistration: React.FC = () => {
   const [alerts, setAlerts] = useState<CityAlert[]>([])
@@ -34,17 +35,7 @@ const AlertRegistration: React.FC = () => {
   const navigate = useNavigate()
   const userId = localStorage.getItem('user_id')
 
-  useEffect(() => {
-    if (!userId) {
-      navigate('/login')
-      return
-    }
-
-    setUserName(localStorage.getItem('user_name') || 'Usuário')
-    fetchAlerts()
-  }, [userId, navigate])
-
-  const fetchAlerts = async () => {
+  const fetchAlerts = useCallback(async () => {
     if (!userId) return
     setLoading(true)
     try {
@@ -56,7 +47,17 @@ const AlertRegistration: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId])
+
+  useEffect(() => {
+    if (!userId) {
+      navigate('/login')
+      return
+    }
+
+    setUserName(localStorage.getItem('user_name') || 'Usuário')
+    fetchAlerts()
+  }, [userId, navigate, fetchAlerts])
 
   const handleAddAlert = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,9 +71,9 @@ const AlertRegistration: React.FC = () => {
         alert_email: alertEmail
       })
       setCityName('')
-      fetchAlerts() // Recarrega a lista
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Erro ao cadastrar alerta.')
+      await fetchAlerts() // Recarrega a lista
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Erro ao cadastrar alerta.'))
     } finally {
       setActionLoading(false)
     }
@@ -84,8 +85,8 @@ const AlertRegistration: React.FC = () => {
     setActionLoading(true)
     try {
       await deleteAlert(userId, alertId)
-      fetchAlerts()
-    } catch (err) {
+      await fetchAlerts()
+    } catch {
       setError('Erro ao remover alerta.')
     } finally {
       setActionLoading(false)
@@ -95,7 +96,7 @@ const AlertRegistration: React.FC = () => {
   return (
     <div className="space-y-10 animate-in fade-in zoom-in-95 duration-500">
       <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-bold text-white tracking-tight">
+        <h2 className="text-2xl font-bold text-brand-text tracking-tight">
           Configuração de Alertas
         </h2>
         <p className="text-brand-muted max-w-2xl font-medium leading-relaxed text-sm">
@@ -189,7 +190,7 @@ const AlertRegistration: React.FC = () => {
                         <Zap size={18} />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-white">{alert.city_name}, {alert.state_code}</p>
+                        <p className="text-sm font-bold text-brand-text">{alert.city_name}, {alert.state_code}</p>
                         <p className="text-xs text-brand-safe font-semibold uppercase tracking-tight">
                           {alert.is_active ? 'Monitoramento Ativo' : 'Inativo'}
                         </p>
@@ -214,7 +215,7 @@ const AlertRegistration: React.FC = () => {
             <div className="space-y-4 mt-3">
               <div className="p-4 rounded-xl bg-brand-bg border border-brand-primary/30">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-white">E-mail de Alerta</span>
+                  <span className="text-sm font-bold text-brand-text">E-mail de Alerta</span>
                   <CheckCircle2 size={16} className="text-brand-primary" />
                 </div>
                 <p className="text-xs text-brand-muted leading-relaxed font-medium">
@@ -237,7 +238,7 @@ const AlertRegistration: React.FC = () => {
                 <div className="p-2 bg-brand-primary/10 rounded-lg">
                   <Shield size={20} className="text-brand-primary" />
                 </div>
-                <h4 className="text-base font-bold text-white leading-tight">
+                <h4 className="text-base font-bold text-brand-text leading-tight">
                   Segurança em Tempo Real
                 </h4>
               </div>
