@@ -1,73 +1,57 @@
-# React + TypeScript + Vite
+FluviAlert — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface web do FluviAlert, um sistema de monitoramento de nível de rios e alertas de enchente. A aplicação consome a API do backend para exibir os níveis monitorados, o estado de alerta atual e permitir o acesso autenticado dos usuários.
 
-Currently, two official plugins are available:
+Funcionalidades
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## React Compiler
+Visualização do nível do rio e do estado de alerta em tempo próximo do real.
+Autenticação de usuários (login/cadastro) integrada à API.
+Interface responsiva, adaptada para desktop e mobile.
+Navegação entre páginas com React Router.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Expanding the ESLint configuration
+Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+React 19 + TypeScript
+Vite — build e dev server
+Tailwind CSS — estilização
+React Router — roteamento
+Axios — consumo da API REST
+lucide-react — ícones
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Como rodar localmente
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Pré-requisitos: Node.js 18+ e o backend em execução.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+bash# Clonar o repositório
+git clone https://github.com/edulsantos/FluviAlert.git
+cd FluviAlert
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+# Instalar dependências
+npm install
+
+# Configurar a URL da API (crie um arquivo .env)
+echo "VITE_API_URL=http://localhost:8000" > .env
+
+# Iniciar em modo de desenvolvimento
+npm run dev
+
+A aplicação ficará disponível em http://localhost:5173.
+
+Scripts
+
+
+npm run dev — ambiente de desenvolvimento
+npm run build — build de produção
+npm run preview — pré-visualização do build
+
+
+Backend
+
+A API que alimenta esta interface está em: https://github.com/edulsantos/FluviAlert_backend
+
+
+Projeto desenvolvido por Eduardo Lourenço.
